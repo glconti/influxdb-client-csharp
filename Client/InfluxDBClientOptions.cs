@@ -1,6 +1,8 @@
 using System;
 using System.Configuration;
 using System.Net;
+using System.Net.Http;
+using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
 using System.Web;
 using InfluxDB.Client.Configurations;
@@ -41,6 +43,7 @@ namespace InfluxDB.Client
         public PointSettings PointSettings { get; }
 
         public bool VerifySsl { get; }
+        public X509Certificate ClientCertificate { get; }
 
         private InfluxDBClientOptions(Builder builder)
         {
@@ -65,6 +68,7 @@ namespace InfluxDB.Client
             PointSettings = builder.PointSettings;
 
             VerifySsl = builder.VerifySslCertificates;
+            ClientCertificate = builder.ClientCertificate;
         }
 
         /// <summary>
@@ -109,6 +113,7 @@ namespace InfluxDB.Client
             internal IWebProxy WebProxy;
             internal bool AllowHttpRedirects;
             internal bool VerifySslCertificates = true;
+            internal X509Certificate ClientCertificate;
 
             internal PointSettings PointSettings = new PointSettings();
 
@@ -304,6 +309,20 @@ namespace InfluxDB.Client
                 Arguments.CheckNotNull(verifySsl, nameof(verifySsl));
 
                 VerifySslCertificates = verifySsl;
+
+                return this;
+            }
+
+            /// <summary>
+            /// Use client certificate to establish SSL connection
+            /// </summary>
+            /// <param name="clientCertificate">The client certificate.</param>
+            /// <returns><see cref="Builder"/></returns>
+            public Builder UseClientCertificate(X509Certificate clientCertificate)
+            {
+                Arguments.CheckNotNull(clientCertificate, nameof(clientCertificate));
+
+                ClientCertificate = clientCertificate;
 
                 return this;
             }
